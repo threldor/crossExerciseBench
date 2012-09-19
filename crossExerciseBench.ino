@@ -23,30 +23,60 @@
  This example code is in the public domain.
  */
 
+#include <SPI.h>
+#include <MCP4131.h>
 
-  #define SENSOR0PIN A0
-  #define SENSOR1PIN A1
+#define SENSOR0PIN A0
+#define SENSOR1PIN A1
+#define POT0PIN 10
+#define POT1PIN 9
 
-  unsigned long currentTime = 0;
-  unsigned long previousTime = 0;
-  unsigned long deltaTime = 0;
-  int sensor0Val, sensor0Val;
+// values used for the minimum and maximum range of the sensor to 
+// determine a motion on the bench
+#define SENSOR0MIN 100
+#define SENSOR0MAX 900
+#define SENSOR1MIN 100
+#define SENSOR1MAX 900
 
-  /**
-   * Measure critical sensors
-   */
-  void measureSensors() {
-    if (deltaTime >= 10) { //10ms
-      // read the inputs:
-      sensor0Val = analogRead(SENSOR0PIN);
-      sensor1Val = analogRead(SENSOR1PIN);
-    }
+#define deltaReduce 5000 // 5 seconds
+
+// time
+unsigned long currentTime = 0;
+unsigned long previousTime = 0;
+unsigned long deltaTime = 0;
+
+// volume
+int currentVolume = 0;
+#define STEPCOUNT 5
+int volume[5] = {20, 40, 60, 80, 100}; //not tested
+
+//input and outputs
+int sensor0Val, sensor0Val;
+pot0 MCP4131(POT0PIN); 
+pot1 MCP4131(POT1PIN); 
+
+// arm position
+boolean hasRested = true;
+
+/**
+ * Measure critical sensors
+ */
+void measureSensors() {
+  if (deltaTime >= 10) { //10ms
+    // read the inputs:
+    sensor0Val = analogRead(SENSOR0PIN);
+    sensor1Val = analogRead(SENSOR1PIN);
   }
+}
 
 // the setup routine runs once when you press reset:
 void setup() {
+  // set pin directions
   pinMode(SENSOR0PIN, INPUT);
   pinMode(SENSOR1PIN, INPUT);
+  //set pots to initial volume level
+  pot0.setTap(volume[currentVolume]);
+  pot1.setTap(volume[currentVolume]);
 }
 
 // the loop routine runs over and over again forever:
@@ -58,8 +88,53 @@ void loop() {
   // measure input sensors
   measureSensors();
   
+  // check sensors for bot at max to increase volume
+  if (sensor0Val > SENSOR0MAX && sensor1Val > SENSOR1MAX) {
+    //make sure they have gone back down first
+	if (hasRested) {
+	  // both arms have done a full motion so we can increase volume
+	  currentVolume++;
+	
+	  // ensure it doesn't go above maximum
+	  if (currentVolume >= STEPCOUNT) {
+	    currentVolume = 4;
+	  }
+	  
+	  //send to pots
+	  pot0.setTap(volume[currentVolume]);
+	  pot1.setTap(volume[currentVolume]);
+	  
+	  // reset the previous time the volume changed
+	  previousTime = currentTime;
+	  
+	  // we have now no longer rested so
+	  hasRested = false;
+	}
+  }
   
-  delay(1);        // delay in between reads for stability
+  // check sensors for rested state
+  if (sensor0Val < SENSOR0MIN && sensor1Val < SENSOR1MIN) {
+    hasRested = true;
+  }
   
-  previousTime = currentTime;
+  // check time to reduce volume
+  if (deltaTime > deltaReduce) {
+	// reduce volume level
+    currentVolume--;
+	
+	// ensure it doesn't go below 0
+	if (currentVolume < 0) {
+	  currentVolume = 0;
+	}
+	
+	//send to pots
+	pot0.setTap(volume[currentVolume]);
+	pot1.setTap(volume[currentVolume]);
+	
+	// reset the previous time the volume changed
+	previousTime = currentTime;
+  }
+  
+  // delay for stability
+  delay(1);
 }
