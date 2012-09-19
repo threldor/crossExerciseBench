@@ -14,7 +14,7 @@ Orginal Version developed by declanshanaghy
 #ifndef MCP4131_h
 #define MCP4131_h
 
-#include "WProgram.h"
+#include <WProgram.h>
 #include <SPI.h>
 
 #define MOSI		11
