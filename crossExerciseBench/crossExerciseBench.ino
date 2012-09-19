@@ -52,8 +52,8 @@ int volume[5] = {20, 40, 60, 80, 100}; //not tested
 
 //input and outputs
 int sensor0Val, sensor1Val;
-MCP4131 pot0(10); 
-//MCP4131 pot1(POT1PIN); 
+MCP4131 pot0(POT0PIN); 
+MCP4131 pot1(POT1PIN); 
 
 // arm position
 boolean hasRested = true;
