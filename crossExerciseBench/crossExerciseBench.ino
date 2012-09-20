@@ -26,6 +26,9 @@
 #include <SPI.h>
 #include <MCP4131.h>
 
+
+//#define DEBUG //uncomment for debugging
+
 #define SENSOR0PIN A0
 #define SENSOR1PIN A1
 #define POT0PIN 10
@@ -44,6 +47,7 @@
 unsigned long currentTime = 0;
 unsigned long previousTime = 0;
 unsigned long deltaTime = 0;
+unsigned long deltaTimeSensor = 0;
 
 // volume
 int currentVolume = 0;
@@ -62,24 +66,45 @@ boolean hasRested = true;
  * Measure critical sensors
  */
 void measureSensors() {
-  if (deltaTime >= 10) { //10ms
-    // read the inputs:
-    sensor0Val = analogRead(SENSOR0PIN);
-    sensor1Val = analogRead(SENSOR1PIN);
-  }
+  // read the inputs:
+  // read once to set the ADC correctly, wait for the capacitor to charge the read again
+  sensor0Val = analogRead(SENSOR0PIN);
+  delay(10);
+  sensor0Val = analogRead(SENSOR0PIN);
+  
+  sensor1Val = analogRead(SENSOR1PIN);
+  delay(10);
+  sensor1Val = analogRead(SENSOR1PIN);
+  
+  #ifdef DEBUG
+  Serial.print("Sensor0: ")
+  Serial.print(sensor0Val);
+  Serial.print("  Sensor1: ")
+  Serial.println(sensor1Val);
+  #endif
 }
 
-// the setup routine runs once when you press reset:
+/**
+ * Setup routine
+ */
 void setup() {
   // set pin directions
   pinMode(SENSOR0PIN, INPUT);
   pinMode(SENSOR1PIN, INPUT);
+  
   //set pots to initial volume level
   pot0.setTap(volume[currentVolume]);
   pot1.setTap(volume[currentVolume]);
+  
+  //setup DEBUG
+  #ifdef DEBUG
+  Serial.begin(9600);
+  #endif
 }
 
-// the loop routine runs over and over again forever:
+/**
+ * Loop
+ */
 void loop() {
 
   currentTime = millis();
@@ -103,6 +128,12 @@ void loop() {
 	  //send to pots
 	  pot0.setTap(volume[currentVolume]);
 	  pot1.setTap(volume[currentVolume]);
+	  
+	  
+      #ifdef DEBUG
+      Serial.print("Pot Volume Increase: ")
+      Serial.println(volume[currentVolume]);
+      #endif
 	  
 	  // reset the previous time the volume changed
 	  previousTime = currentTime;
@@ -131,10 +162,15 @@ void loop() {
 	pot0.setTap(volume[currentVolume]);
 	pot1.setTap(volume[currentVolume]);
 	
+    #ifdef DEBUG
+    Serial.print("Pot Volume Decrease: ")
+    Serial.println(volume[currentVolume]);
+    #endif
+	
 	// reset the previous time the volume changed
 	previousTime = currentTime;
   }
   
   // delay for stability
-  delay(1);
+  delay(10);
 }
