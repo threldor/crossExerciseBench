@@ -26,6 +26,9 @@
 #include <SPI.h>
 #include <MCP4131.h>
 
+
+//#define DEBUG //uncomment for debugging
+
 #define SENSOR0PIN A0
 #define SENSOR1PIN A1
 #define POT0PIN 10
@@ -66,6 +69,13 @@ void measureSensors() {
   // read the inputs:
   sensor0Val = analogRead(SENSOR0PIN);
   sensor1Val = analogRead(SENSOR1PIN);
+  
+  #ifdef DEBUG
+  Serial.print("Sensor0: ")
+  Serial.print(sensor0Val);
+  Serial.print("  Sensor1: ")
+  Serial.println(sensor1Val);
+  #endif
 }
 
 /**
@@ -75,9 +85,15 @@ void setup() {
   // set pin directions
   pinMode(SENSOR0PIN, INPUT);
   pinMode(SENSOR1PIN, INPUT);
+  
   //set pots to initial volume level
   pot0.setTap(volume[currentVolume]);
   pot1.setTap(volume[currentVolume]);
+  
+  //setup DEBUG
+  #ifdef DEBUG
+  Serial.begin(9600);
+  #endif
 }
 
 /**
@@ -107,6 +123,12 @@ void loop() {
 	  pot0.setTap(volume[currentVolume]);
 	  pot1.setTap(volume[currentVolume]);
 	  
+	  
+      #ifdef DEBUG
+      Serial.print("Pot Volume Increase: ")
+      Serial.println(volume[currentVolume]);
+      #endif
+	  
 	  // reset the previous time the volume changed
 	  previousTime = currentTime;
 	  
@@ -133,6 +155,11 @@ void loop() {
 	//send to pots
 	pot0.setTap(volume[currentVolume]);
 	pot1.setTap(volume[currentVolume]);
+	
+    #ifdef DEBUG
+    Serial.print("Pot Volume Decrease: ")
+    Serial.println(volume[currentVolume]);
+    #endif
 	
 	// reset the previous time the volume changed
 	previousTime = currentTime;
