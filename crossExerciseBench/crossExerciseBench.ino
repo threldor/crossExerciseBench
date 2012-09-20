@@ -44,6 +44,7 @@
 unsigned long currentTime = 0;
 unsigned long previousTime = 0;
 unsigned long deltaTime = 0;
+unsigned long deltaTimeSensor = 0;
 
 // volume
 int currentVolume = 0;
@@ -62,14 +63,14 @@ boolean hasRested = true;
  * Measure critical sensors
  */
 void measureSensors() {
-  if (deltaTime >= 10) { //10ms
-    // read the inputs:
-    sensor0Val = analogRead(SENSOR0PIN);
-    sensor1Val = analogRead(SENSOR1PIN);
-  }
+  // read the inputs:
+  sensor0Val = analogRead(SENSOR0PIN);
+  sensor1Val = analogRead(SENSOR1PIN);
 }
 
-// the setup routine runs once when you press reset:
+/**
+ * Setup routine
+ */
 void setup() {
   // set pin directions
   pinMode(SENSOR0PIN, INPUT);
@@ -79,7 +80,9 @@ void setup() {
   pot1.setTap(volume[currentVolume]);
 }
 
-// the loop routine runs over and over again forever:
+/**
+ * Loop
+ */
 void loop() {
 
   currentTime = millis();
