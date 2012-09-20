@@ -28,6 +28,7 @@
 
 
 #define DEBUG //uncomment for debugging
+//#define DEBUGSENSOR //uncomment for debugging
 
 #define SENSOR0PIN A0
 #define SENSOR1PIN A1
@@ -36,10 +37,10 @@
 
 // values used for the minimum and maximum range of the sensor to 
 // determine a motion on the bench
-#define SENSOR0MIN 100
-#define SENSOR0MAX 900
-#define SENSOR1MIN 100
-#define SENSOR1MAX 900
+#define SENSOR0MIN 200
+#define SENSOR0MAX 800
+#define SENSOR1MIN 200
+#define SENSOR1MAX 800
 
 #define deltaReduce 5000 // 5 seconds
 
@@ -52,7 +53,8 @@ unsigned long deltaTimeSensor = 0;
 // volume
 int currentVolume = 0;
 #define STEPCOUNT 5
-int volume[5] = {20, 40, 60, 80, 100}; //not tested
+//127 is minimum, 1 is max
+int volume[5] = {127, 115, 80, 30, 1}; //initial working values
 
 //input and outputs
 int sensor0Val, sensor1Val;
@@ -76,7 +78,7 @@ void measureSensors() {
   delay(10);
   sensor1Val = analogRead(SENSOR1PIN);
   
-  #ifdef DEBUG
+  #ifdef DEBUGSENSOR
   Serial.print("Sensor0: ");
   Serial.print(sensor0Val);
   Serial.print("  Sensor1: ");
