@@ -67,7 +67,13 @@ boolean hasRested = true;
  */
 void measureSensors() {
   // read the inputs:
+  // read once to set the ADC correctly, wait for the capacitor to charge the read again
   sensor0Val = analogRead(SENSOR0PIN);
+  delay(10);
+  sensor0Val = analogRead(SENSOR0PIN);
+  
+  sensor1Val = analogRead(SENSOR1PIN);
+  delay(10);
   sensor1Val = analogRead(SENSOR1PIN);
   
   #ifdef DEBUG
@@ -166,5 +172,5 @@ void loop() {
   }
   
   // delay for stability
-  delay(1);
+  delay(10);
 }
